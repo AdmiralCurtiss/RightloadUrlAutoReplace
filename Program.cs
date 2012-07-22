@@ -10,9 +10,17 @@ namespace RightloadUrlAutoReplace
     {
         static void Main(string[] args)
         {
-            if (args.Length < 2 || args.Length > 5)
+            if (args.Length < 2 || args.Length > 6)
             {
-                Console.WriteLine("Usage: RightloadUrlAutoReplace update.txt urls.txt [update_replaced.txt] [replace name prefix] [replace name postfix]");
+                Console.WriteLine(
+					"Usage: RightloadUrlAutoReplace"
+					+ " update.txt"
+					+ " urls.txt"
+					+ " [update_replaced.txt]"
+					+ " [replace name prefix]"
+					+ " [replace name postfix]"
+					+ " [-keepextension]"
+				);
                 return;
             }
 
@@ -21,13 +29,21 @@ namespace RightloadUrlAutoReplace
             string UpdateOutFilename;
             string ReplacementPrefix;
             string ReplacementPostfix;
-            
-            UpdateInFilename = Path.GetFullPath(args[0]);
-            UrlsInFilename = Path.GetFullPath(args[1]);
-            UpdateOutFilename = args.Length >= 3 ? Path.GetFullPath(args[2]) :
-                Path.GetDirectoryName(UpdateInFilename) + System.IO.Path.DirectorySeparatorChar + Path.GetFileNameWithoutExtension(UpdateInFilename) + "_replaced" + Path.GetExtension(UpdateInFilename);
-            ReplacementPrefix = args.Length >= 4 ? args[3] : "[";
-            ReplacementPostfix = args.Length >= 5 ? args[4] : "]";
+			bool KeepFilenameExtension;
+
+			try {
+				UpdateInFilename = Path.GetFullPath( args[0] );
+				UrlsInFilename = Path.GetFullPath( args[1] );
+				UpdateOutFilename = args.Length >= 3 ? Path.GetFullPath( args[2] ) :
+					Path.GetDirectoryName( UpdateInFilename ) + System.IO.Path.DirectorySeparatorChar + Path.GetFileNameWithoutExtension( UpdateInFilename ) + "_replaced" + Path.GetExtension( UpdateInFilename );
+				ReplacementPrefix = args.Length >= 4 ? args[3] : "[";
+				ReplacementPostfix = args.Length >= 5 ? args[4] : "]";
+				KeepFilenameExtension = args.Length >= 6 ? args[5] == "-keepextension" : false;
+			} catch ( Exception ex ) {
+				Console.WriteLine( "Failed parsing arguments." );
+				Console.WriteLine( "Exception: " + ex.Message );
+				return;
+			}
 
             string Update;
             string[] Urls;
@@ -57,9 +73,14 @@ namespace RightloadUrlAutoReplace
                     if ( imgnameStart == -1 ) continue;
                     imgnameStart += 1;
 
-                    int imgnameEnd = s.LastIndexOf('.');
-                    if ( imgnameStart == -1 || imgnameEnd < imgnameStart )
-                        imgnameEnd = s.Length;
+                    int imgnameEnd;
+					if ( !KeepFilenameExtension ) {
+						imgnameEnd = s.LastIndexOf( '.' );
+						if ( imgnameStart == -1 || imgnameEnd < imgnameStart )
+							imgnameEnd = s.Length;
+					} else {
+						imgnameEnd = s.Length;
+					}
 
                     string imgname = s.Substring(imgnameStart, imgnameEnd - imgnameStart);
 
