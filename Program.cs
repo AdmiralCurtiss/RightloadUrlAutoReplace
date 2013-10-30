@@ -63,7 +63,12 @@ namespace RightloadUrlAutoReplace
             foreach ( string u in Urls ) {
                 try {
                     string s = u;
-                    if ( s.StartsWith("[img]", StringComparison.InvariantCultureIgnoreCase) )
+
+					if ( s.Contains( '|' ) ) {
+						s = s.Substring( s.IndexOf( '|' ) + 1 );
+					}
+
+					if ( s.StartsWith( "[img]", StringComparison.InvariantCultureIgnoreCase ) )
                         s = s.Substring("[img]".Length);
                     if ( s.EndsWith("[/img]", StringComparison.InvariantCultureIgnoreCase) )
                         s = s.Substring(0, s.Length - "[/img]".Length);
@@ -83,6 +88,9 @@ namespace RightloadUrlAutoReplace
 					}
 
                     string imgname = s.Substring(imgnameStart, imgnameEnd - imgnameStart);
+					if ( u.Contains( '|' ) ) {
+						imgname = u.Substring( 0, u.IndexOf( '|' ) );
+					}
 
                     Update = Update.Replace(ReplacementPrefix + imgname + ReplacementPostfix, "[img]" + url + "[/img]");
                 } catch (Exception) {
